@@ -1,127 +1,49 @@
-# Terraform-Lab-1
-First Terraform Lab using Ubuntu I7 Laptop, Ubuntu workstation, AWS EC2 and S3 Bucket
+# Terraform Lab 1: AWS S3 and Docker Nginx Testbed
 
-Terraform Testbed Lab Overview
-High-Level Overview of Steps
-This lab set up a Terraform testbed to manage AWS cloud resources (S3 bucket) and local Docker resources ([Nginx](https://vishnu.hashnode.dev/nginx-cheatsheet) container) using my Laptop (Razer Blade, Ubuntu) and Workstation (Ubuntu mini PC, “Jarvis1”, 32GB RAM, 1TB SSD), with an AWS EC2 instance in the mix. 
+## Overview
+This repository demonstrates a Terraform testbed managing cloud and local resources:
+- **AWS S3 Bucket**: Deployed a uniquely named S3 bucket in AWS.
+- **Docker Nginx Container**: Ran an Nginx web server on a local Ubuntu workstation.
+- **Purpose**: Built to practice infrastructure as code (IaC) for job search preparation, showcasing Terraform, AWS, and Docker skills.
 
-Here’s what I did, where, and what was needed to get Terraform running:
-1. Install and Configure Terraform (Laptop)
+## Architecture
+- **Laptop (Ubuntu)**: Ran Terraform and AWS CLI to manage resources.
+- **Workstation (Ubuntu, 32GB RAM, 1TB SSD)**: Hosted Docker containers, accessed remotely via port 2375.
+- **AWS**: Hosted S3 bucket; supports EC2 for future extensions.
 
-Location: Laptop (Razer Blade, Ubuntu)
-Steps:
-Installed Terraform via apt.
-Verified with terraform -version.
+## Setup and Deployment
+1. **Installed Tools** (Laptop):
+   - Terraform for IaC.
+   - AWS CLI for cloud authentication.
+2. **Configured Docker** (Workstation):
+   - Enabled remote access on port 2375 with firewall restrictions.
+3. **Wrote Terraform Config** (Laptop):
+   - `main.tf`: Defined S3 bucket and Nginx container.
+   - `variables.tf`: Parameterized inputs for reusability.
+4. **Deployed and Verified**:
+   - Ran `terraform init`, `plan`, `apply`.
+   - Verified S3 bucket in AWS Console and Nginx at `http://<your_docker_host_ip>:8081`.
 
+## Troubleshooting Highlights
+- **AWS CLI Install**: Fixed missing `awscli` package by using AWS’s official installer.
+- **Docker Service**: Resolved daemon failure by correcting `systemd` config syntax.
+- **Terraform Errors**:
+  - Updated provider from `hashicorp/docker` to `kreuzwerker/docker`.
+  - Fixed S3 bucket naming with lowercase random strings.
+  - Resolved Docker port conflict by switching from 8080 to 8081.
+  - **Terraform Provider Error**: Fixed duplicate AWS provider issue by consolidating into a single provider block.
 
-Requirements:
-Ubuntu package manager (apt) or internet access for downloading Terraform binary.
-Sudo permissions for system-wide installation.
+## Files
+- `main.tf`: Core Terraform config for AWS and Docker resources.
+- `variables.tf`: Input variables for flexible configuration.
+- `.gitignore`: Excludes sensitive Terraform and AWS files.
+- `LICENSE`: MIT License for open-source sharing.
+- `terraform.tfvars.example`: Template for configuration.
+- `setup.sh`: Script to automate setup and deployment.
+- `screenshots/`: Visual proof of deployment.
 
-Purpose: Terraform is the core tool for defining and deploying infrastructure as code (IaC).
-
-2. Install and Configure AWS CLI (Laptop)
-
-Location: Laptop
-Steps:
-Hit a snag with apt install awscli (package not found).
-Installed AWS CLI v2 using the official installer:curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-
-Configured with aws configure using AWS Access Key ID, Secret Key, region (e.g., us-east-1), and output format (json).
-Tested with aws sts get-caller-identity.
-
-Requirements:
-curl, unzip, and internet access.
-AWS account with IAM user credentials (Access Key/Secret Key).
-IAM permissions for S3 (AmazonS3FullAccess) and optionally EC2.
-
-Purpose: AWS CLI authenticates Terraform to manage AWS resources.
-
-3. Install and Configure Docker (Workstation)
-
-Location: Workstation (Jarvis1)
-Steps:
-Installed Docker:sudo apt install -y docker.io
-sudo usermod -aG docker $USER
-sudo systemctl enable docker --now
-
-Enabled remote access on port 2375 for Terraform’s Docker provider:
-Edited /usr/lib/systemd/system/docker.service, setting:ExecStart=/usr/bin/dockerd -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375
-
-Fixed a syntax error (tcp:0.0.0.0:2375 missing //).
-Restarted Docker: sudo systemctl restart docker.
-
-Secured port 2375 with UFW:sudo ufw allow from <laptop_ip> to any port 2375
-
-Tested remote access from Laptop:curl http://<workstation_ip>:2375/version
-
-Requirements:
-Ubuntu with apt and internet access.
-Sudo permissions.
-Network connectivity between Laptop and Workstation (same LAN).
-
-Purpose: Docker runs containers (e.g., Nginx) managed by Terraform.
-
-4. Create and Deploy Terraform Config (Laptop)
-
-Location: Laptop
-Steps:
-Created terraform-testbed directory: mkdir ~/terraform-testbed.
-Wrote main.tf to manage:
-AWS S3 bucket with a unique name using random_string.
-Docker Nginx container on Workstation.
-
-Fixed provider error (hashicorp/docker → kreuzwerker/docker).
-Resolved S3 naming issue (added upper = false to random_string).
-Fixed Docker port conflict (changed from 8080 to 8081).
-Ran Terraform commands:
-terraform init
-terraform plan
-terraform apply
-
-Verified:
-S3 bucket in AWS Console.
-Nginx at http://<workstation_ip>:8081 and docker ps on Workstation.
-
-Cleaned up with terraform destroy.
-
-Requirements:
-Terraform and AWS CLI installed.
-Text editor (e.g., nano).
-Network access to Workstation’s Docker daemon (port 2375).
-AWS credentials and permissions.
-
-Purpose: Deployed and managed cloud and local resources, showcasing IaC skills.
-
-5. Troubleshooting (Laptop and Workstation)
-
-Locations: Both
-Steps:
-Fixed AWS CLI install error on Laptop.
-Debugged Docker service failure on Workstation (syntax in docker.service).
-Resolved Terraform errors (provider source, S3 naming, port conflict).
-
-Requirements:
-Access to logs (systemctl status, journalctl).
-Basic Linux skills for file editing and process management.
-
-Purpose: Built troubleshooting skills for real-world IaC challenges.
-
-What’s Needed to Get Terraform Running
-
-Laptop:
-Software: Terraform, AWS CLI, text editor.
-Access: Internet, AWS credentials, network connectivity to Workstation.
-Permissions: Sudo for installs, IAM permissions for AWS.
-
-Workstation:
-Software: Docker.
-Access: Network reachable from Laptop (port 2375).
-Permissions: Sudo for Docker config and firewall.
-
-AWS:
-Active account with IAM user/role.
-Permissions for S3, EC2, etc.
-Optional: .pem key pair for EC2 SSH access.
+## How to Run
+1. Clone this repo:
+   ```bash
+   git clone https://github.com/Cloud-Ops-Dev/Terraform-Lab-1.git
+   cd Terraform-Lab-1
