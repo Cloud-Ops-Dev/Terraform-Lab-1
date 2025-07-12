@@ -4,7 +4,7 @@
 This repository demonstrates a Terraform testbed managing cloud and local resources:
 - **AWS S3 Bucket**: Deployed a uniquely named S3 bucket in AWS.
 - **Docker Nginx Container**: Ran an Nginx web server on a local Ubuntu workstation.
-- **Purpose**: Built to practice infrastructure as code (IaC) for job search preparation, showcasing Terraform, AWS, and Docker skills.
+- **Purpose**: Built to practice infrastructure as code (IaC), showcasing Terraform, AWS, and Docker skills.
 
 ## Architecture
 - **Laptop (Ubuntu)**: Ran Terraform and AWS CLI to manage resources.
